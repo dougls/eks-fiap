@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sonarqube
+  labels:
+    app: sonarqube
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sonarqube
+  template:
+    metadata:
+      labels:
+        app: sonarqube
+    spec:
+      containers:
+        - name: sonarqube
+          image: sonarqube:8.9.2-community
+          args:
+            - -Dsonar.web.context=/sonar
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1024Mi
+            limits:
+              cpu: 2000m
+              memory: 2048Mi
+          env:
+            - name: "SONARQUBE_JDBC_USERNAME"
+              value: "sonar"
+            - name: "SONARQUBE_JDBC_URL"
+              valueFrom:  
+                secretKeyRef:  
+                  name: vars  
+                  key: db-uri
+            - name: "SONARQUBE_JDBC_PASSWORD"
+              valueFrom:  
+                secretKeyRef:  
+                  name: vars  
+                  key: db-pass
+          ports:
+            - containerPort: 9000
+              protocol: TCP
